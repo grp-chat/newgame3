@@ -5,7 +5,7 @@ var nickname = '';
 var pinNumber = 0;
 var correctPin = false;
 var secs = 0;
-var students = ["LK", "LXR", "TJY", "JL", "JHA", "JL", "SZF"];
+var students = ["LK", "LXR", "TJY", "JL", "JHA", "SZF"];
 var gameOver = false;
 
 
@@ -75,9 +75,36 @@ canvas.height = innerHeight
 var dropBox = document.createElement("select");
 dropBox.style.position = "absolute";
 dropBox.style.left = "70%";
-dropBox.style.top = "10%";
+dropBox.style.top = "5%";
 dropBox.setAttribute("id", "dropbox");
 document.body.appendChild(dropBox);
+
+var h3P = document.createElement("h3");
+h3P.style.position = "absolute";
+h3P.style.left = "89%";
+h3P.style.top = "2%";
+h3P.innerHTML = "Pac Man = ";
+h3P.style.color = "yellow";
+document.body.appendChild(h3P);
+
+var pacman = document.createElement("button");
+pacman.style.position = "absolute";
+pacman.style.left = "80%";
+pacman.style.top = "5%";
+pacman.innerHTML = "Make Pac-Man";
+document.body.appendChild(pacman);
+pacman.addEventListener('click', () => {
+    socket.emit("makepacman", dropBox.value);
+    h3P.innerHTML = "Pac Man = " + dropBox.value;
+});
+
+var h3B = document.createElement("h3");
+h3B.style.position = "absolute";
+h3B.style.left = "89%";
+h3B.style.top = "7%";
+h3B.innerHTML = "Blinky = ";
+h3B.style.color = "red";
+document.body.appendChild(h3B);
 
 var blinky = document.createElement("button");
 blinky.style.position = "absolute";
@@ -87,9 +114,16 @@ blinky.innerHTML = "Make blinky";
 document.body.appendChild(blinky);
 blinky.addEventListener('click', () => {
     socket.emit("makeblinky", dropBox.value);
-    /* alert(dropBox.value);
-    alert("blinky"); */
+    h3B.innerHTML = "Blinky = " + dropBox.value;
 });
+
+var h3Pi = document.createElement("h3");
+h3Pi.style.position = "absolute";
+h3Pi.style.left = "89%";
+h3Pi.style.top = "12%";
+h3Pi.innerHTML = "Pinky = ";
+h3Pi.style.color = "pink";
+document.body.appendChild(h3Pi);
 
 var pinky = document.createElement("button");
 pinky.style.position = "absolute";
@@ -97,6 +131,18 @@ pinky.style.left = "80%";
 pinky.style.top = "15%";
 pinky.innerHTML = "Make pinky";
 document.body.appendChild(pinky);
+pinky.addEventListener('click', () => {
+    socket.emit("makepinky", dropBox.value);
+    h3Pi.innerHTML = "Pinky = " + dropBox.value;
+});
+
+var h3I = document.createElement("h3");
+h3I.style.position = "absolute";
+h3I.style.left = "89%";
+h3I.style.top = "17%";
+h3I.innerHTML = "Inky = ";
+h3I.style.color = "cyan";
+document.body.appendChild(h3I);
 
 var inky = document.createElement("button");
 inky.style.position = "absolute";
@@ -104,6 +150,10 @@ inky.style.left = "80%";
 inky.style.top = "20%";
 inky.innerHTML = "Make inky";
 document.body.appendChild(inky);
+inky.addEventListener('click', () => {
+    socket.emit("makeinky", dropBox.value);
+    h3I.innerHTML = "Inky = " + dropBox.value;
+});
 
 var gameStart = document.createElement("button");
 gameStart.style.position = "absolute";
@@ -111,6 +161,10 @@ gameStart.style.left = "80%";
 gameStart.style.top = "25%";
 gameStart.innerHTML = "Game Start!";
 document.body.appendChild(gameStart);
+gameStart.addEventListener('click', () => {
+    secs = 0;
+    
+});
 
 
 var gameRestart = document.createElement("button");
@@ -158,10 +212,21 @@ class Player {
         //secs = secs.toString()
         c.beginPath()
         c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
-        c.fillStyle = 'yellow'
+        c.fillStyle = 'grey'
         if (this.role === 'blinky') {
             c.fillStyle = 'red'
         }
+        if (this.role === 'pinky') {
+            c.fillStyle = 'pink'
+        }
+        if (this.role === 'inky') {
+            c.fillStyle = 'cyan'
+        }
+        if (this.role === 'pacman') {
+            c.fillStyle = 'yellow'
+        }
+        console.log(this.name)
+        console.log(this.role)
         c.fill()
         c.closePath()
         c.strokeText(this.name, this.position.x - 12, this.position.y + 4)
@@ -239,8 +304,8 @@ socket.on('newPositions', function (data) {
     
     
 
-    const players = [];
-    const ghost = [];
+    var players = [];
+    var ghost = [];
 
     for (var i = 0; i < data.length; i++) {
         //alert(data[i].number)
@@ -272,9 +337,10 @@ socket.on('newPositions', function (data) {
 
         } */
 
-        if (player.role === "blinky") {
+        if (player.role === "blinky" || player.role === "pinky" || player.role === "inky") {
             ghost.push(player);
-        } else {
+        } 
+        if (player.role === "pacman") {
             players.push(player)
         }
 
@@ -301,16 +367,33 @@ socket.on('newPositions', function (data) {
 
         //console.log(players[0].position.x)
 
-        if (ghost.length === 0) {
+        if (ghost.length < 3 || players.length === 0) {
 
         } else {
+            console.log(ghost[0]);
             if (Math.hypot(
                 players[0].position.x - ghost[0].position.x,
                 players[0].position.y - ghost[0].position.y
             ) <
                 players[0].radius + ghost[0].radius) {
                     socket.emit("gameover", gameOver);
-                    alert(ghost[0].name + " caught " + players[0].name + " at time:" + secs);
+                    alert(ghost[0].name + " caught " + players[0].name + "!");
+            }
+            if (Math.hypot(
+                players[0].position.x - ghost[1].position.x,
+                players[0].position.y - ghost[1].position.y
+            ) <
+                players[0].radius + ghost[1].radius) {
+                    socket.emit("gameover", gameOver);
+                    alert(ghost[1].name + " caught " + players[0].name + "!");
+            }
+            if (Math.hypot(
+                players[0].position.x - ghost[2].position.x,
+                players[0].position.y - ghost[2].position.y
+            ) <
+                players[0].radius + ghost[2].radius) {
+                    socket.emit("gameover", gameOver);
+                    alert(ghost[2].name + " caught " + players[0].name + "!");
             }
         }
 

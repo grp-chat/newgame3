@@ -22,6 +22,10 @@ var miliseconds = 0;
 var SOCKET_LIST = {};
 var nameList = [];
 var gameOver = false;
+var blinky = "none";
+var pinky = "none";
+var inky = "none";
+var pacman = "none";
 
 //===================================================================================================
 class Boundary {
@@ -181,18 +185,32 @@ Player.onConnect = function (socket) {
     socket.on('newuser', function(data) {
         player.nickname = data;
         //gameOver = false;
-    });
-    socket.on('makeblinky', function(data) {
-        if (player.nickname === data) {
+        //console.log(player.nickname);
+
+        if (player.nickname === blinky) {
             player.role = "blinky";
+            
         }
+    
+    
+        if (player.nickname === pinky) {
+            player.role = "pinky";
+        }
+    
+    
+        if (player.nickname === inky) {
+            player.role = "inky";
+        }
+    
+    
+        if (player.nickname === pacman) {
+            player.role = "pacman";
+        }
+
     });
-    socket.on('gameover', function(data) {
-        gameOver = true;
-    });
-    socket.on('restart', function(data) {
-        gameOver = false;
-    });
+    
+    
+
     socket.on('keyPress', function (data) {
         if (data.inputId === 'left')
             player.pressingLeft = data.state;
@@ -240,6 +258,28 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function () {
         delete SOCKET_LIST[socket.id];
         Player.onDisconnect(socket);
+    });
+
+    socket.on('makeblinky', function(data) {
+
+        blinky = data;
+        console.log("make " + blinky + " into blinky");
+        
+    });
+    socket.on('makepinky', function(data) {
+        pinky = data;
+    });
+    socket.on('makeinky', function(data) {
+        inky = data;
+    });
+    socket.on('makepacman', function(data) {
+        pacman = data;
+    });
+    socket.on('gameover', function(data) {
+        gameOver = true;
+    });
+    socket.on('restart', function(data) {
+        gameOver = false;
     });
 
     //socket.on('collision', function(x, y){});
