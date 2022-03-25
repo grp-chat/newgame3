@@ -20,6 +20,8 @@ console.log("Server listening at " + PORT);
 var newuser;
 var miliseconds = 0;
 var SOCKET_LIST = {};
+var nameList = [];
+var gameOver = false;
 
 //===================================================================================================
 class Boundary {
@@ -94,7 +96,7 @@ var Entity = function () {
         spdY: 0,
         radius: 10,
         id: "",
-        //nickname: "adeline"
+        
     }
     self.update = function () {
         self.updatePosition();
@@ -142,7 +144,9 @@ var Player = function (id) {
     self.collided = false;
     self.maxSpd = 4;
     self.nickname = "";
-    self.timer = 0
+    self.timer = 0,
+    self.color = "",
+    self.role = ""
 
     var super_update = self.update;
     self.update = function () {
@@ -169,11 +173,25 @@ var Player = function (id) {
     Player.list[id] = self;
     return self;
 }
+
+
 Player.list = {};
 Player.onConnect = function (socket) {
     var player = Player(socket.id);
     socket.on('newuser', function(data) {
         player.nickname = data;
+        //gameOver = false;
+    });
+    socket.on('makeblinky', function(data) {
+        if (player.nickname === data) {
+            player.role = "blinky";
+        }
+    });
+    socket.on('gameover', function(data) {
+        gameOver = true;
+    });
+    socket.on('restart', function(data) {
+        gameOver = false;
     });
     socket.on('keyPress', function (data) {
         if (data.inputId === 'left')
@@ -185,21 +203,13 @@ Player.onConnect = function (socket) {
         else if (data.inputId === 'down')
             player.pressingDown = data.state;
     });
-    /* socket.on('collision', function() {
-        
-        player.collided = true;
-        //player.spdX = 0;
-        //player.spdY = 0;
-        player.updatePosition();
-        player.collided = false;
-        
-        
-    }); */
 
 }
+
 Player.onDisconnect = function (socket) {
     delete Player.list[socket.id];
 }
+
 Player.update = function () {
     var pack = [];
     for (var i in Player.list) {
@@ -212,17 +222,13 @@ Player.update = function () {
             number: player.number,
             spdX: player.spdX,
             spdY: player.spdY,
-            //id: player.id,
+            id: player.id,
             nick: player.nickname,
+            role: player.role
             //timer: player.timer
         });
-        //console.log(newuser);
-        //console.log(player.timer);
-        //player.timer += 40;
     }
-    
     return pack;
-    
 }
 
 var io = require('socket.io')(serv, {});
@@ -242,19 +248,16 @@ io.sockets.on('connection', function (socket) {
 setInterval(function () {
     var pack = Player.update();
 
-    for (var i in SOCKET_LIST) {
-        var socket = SOCKET_LIST[i];
-        socket.emit('newPositions', pack);
-        //socket.emit('timer', miliseconds);
+    if (gameOver === false) {
+        for (var i in SOCKET_LIST) {
+            var socket = SOCKET_LIST[i];
+            socket.emit('newPositions', pack);
+            //socket.emit('timer', miliseconds);
+        }
     }
+    
     //miliseconds += 40;
     //console.log(miliseconds);
     
 
 }, 1000 / 25);
-
-/* const myFunc = () => {
-    console.log("5 seconds past");
-};
-
-setTimeout(myFunc, 5000); */

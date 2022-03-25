@@ -5,20 +5,23 @@ var nickname = '';
 var pinNumber = 0;
 var correctPin = false;
 var secs = 0;
+var students = ["LK", "LXR", "TJY", "JL", "JHA", "JL", "SZF"];
+var gameOver = false;
+
 
 setInterval(() => {
     secs++;
 }, 1000);
 
 
-    const promptMsg = () => {
+const promptMsg = () => {
     var nick = prompt("Please enter your pin number:");
     while (nick.length == 0) {
         alert("Please enter your pin number!");
         nick = prompt("Please enter your pin number:");
     }
 
-    
+
     if (nick === '9852') {
         nickname = 'LK';
         correctPin = true;
@@ -62,12 +65,67 @@ promptMsg();
 
 
 //........................................................................................
+
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 c.font = '30px Arial'
 canvas.width = innerWidth
 canvas.height = innerHeight
 
+var dropBox = document.createElement("select");
+dropBox.style.position = "absolute";
+dropBox.style.left = "70%";
+dropBox.style.top = "10%";
+dropBox.setAttribute("id", "dropbox");
+document.body.appendChild(dropBox);
+
+var blinky = document.createElement("button");
+blinky.style.position = "absolute";
+blinky.style.left = "80%";
+blinky.style.top = "10%";
+blinky.innerHTML = "Make blinky";
+document.body.appendChild(blinky);
+blinky.addEventListener('click', () => {
+    socket.emit("makeblinky", dropBox.value);
+    /* alert(dropBox.value);
+    alert("blinky"); */
+});
+
+var pinky = document.createElement("button");
+pinky.style.position = "absolute";
+pinky.style.left = "80%";
+pinky.style.top = "15%";
+pinky.innerHTML = "Make pinky";
+document.body.appendChild(pinky);
+
+var inky = document.createElement("button");
+inky.style.position = "absolute";
+inky.style.left = "80%";
+inky.style.top = "20%";
+inky.innerHTML = "Make inky";
+document.body.appendChild(inky);
+
+var gameStart = document.createElement("button");
+gameStart.style.position = "absolute";
+gameStart.style.left = "80%";
+gameStart.style.top = "25%";
+gameStart.innerHTML = "Game Start!";
+document.body.appendChild(gameStart);
+
+
+var gameRestart = document.createElement("button");
+gameRestart.style.position = "absolute";
+gameRestart.style.left = "80%";
+gameRestart.style.top = "30%";
+gameRestart.innerHTML = "Restart";
+document.body.appendChild(gameRestart);
+gameRestart.addEventListener('click', () => {
+    socket.emit("restart", gameOver);
+    /* alert(dropBox.value);
+    alert("blinky"); */
+});
+
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
 class Boundary {
@@ -86,20 +144,24 @@ class Boundary {
 }
 
 class Player {
-    constructor({ position, velocity, name, /* timer */ }) {
+    constructor({ position, velocity, name, role }) {
         this.position = position
         this.velocity = velocity
         this.radius = 10
         //this.id = id
         this.name = name
+        this.role = role
         //this.timer = timer
-        
+
     }
     draw() {
         //secs = secs.toString()
         c.beginPath()
         c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
         c.fillStyle = 'yellow'
+        if (this.role === 'blinky') {
+            c.fillStyle = 'red'
+        }
         c.fill()
         c.closePath()
         c.strokeText(this.name, this.position.x - 12, this.position.y + 4)
@@ -152,9 +214,33 @@ socket.emit('newuser', nickname);
     
 }); */
 
+/* socket.on('namelist', function (data) {
+    data.forEach(name => {
+        var opt = name;
+        var el = document.createElement("option");
+        el.textContent = opt;
+        //el.value = opt;
+        dropBox.appendChild(el);
+    });
+}); */
+
+students.forEach(student => {
+    var opts = student;
+    var el = document.createElement("option");
+    el.textContent = opts;
+    //el.value = opt;
+    dropBox.appendChild(el);
+
+});
+
 
 socket.on('newPositions', function (data) {
-    c.clearRect(0, 0, canvas.width, canvas.height);
+        c.clearRect(0, 0, canvas.width, canvas.height);
+    
+    
+
+    const players = [];
+    const ghost = [];
 
     for (var i = 0; i < data.length; i++) {
         //alert(data[i].number)
@@ -172,10 +258,28 @@ socket.on('newPositions', function (data) {
             },
             id: data[i].id,
             name: data[i].nick,
+            role: data[i].role
             //timer: data[i].timer
+
         })
 
+        //console.log(players.length)
+        /* if (players.length === 0) {
+            players.push(player);
+
+        } else {
+            ghost.push(player)
+
+        } */
+
+        if (player.role === "blinky") {
+            ghost.push(player);
+        } else {
+            players.push(player)
+        }
+
         player.draw()
+
         boundaries.forEach((boundary) => {
             boundary.draw()
 
@@ -190,13 +294,34 @@ socket.on('newPositions', function (data) {
                 //if collision happends
                 player.velocity.x = 0
                 player.velocity.y = 0
-                //collision = true
-                //alert(collision)
-                //socket.emit('collision')
 
             }
 
         })
+
+        //console.log(players[0].position.x)
+
+        if (ghost.length === 0) {
+
+        } else {
+            if (Math.hypot(
+                players[0].position.x - ghost[0].position.x,
+                players[0].position.y - ghost[0].position.y
+            ) <
+                players[0].radius + ghost[0].radius) {
+                    socket.emit("gameover", gameOver);
+                    alert(ghost[0].name + " caught " + players[0].name + " at time:" + secs);
+            }
+        }
+
+
+
+
+
+
+
+
+
         document.onkeydown = function (event) {
             if (event.keyCode === 68)
                 socket.emit('keyPress', { inputId: 'right', state: true });
