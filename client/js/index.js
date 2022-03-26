@@ -78,6 +78,10 @@ dropBox.style.left = "80%";
 dropBox.style.top = "35%";
 dropBox.setAttribute("id", "dropbox");
 document.body.appendChild(dropBox);
+if (nickname != "TCR") {
+    dropBox.style.visibility = "hidden";
+}
+
 
 var h3P = document.createElement("h3");
 h3P.style.position = "absolute";
@@ -97,6 +101,9 @@ pacman.addEventListener('click', () => {
     socket.emit("makepacman", dropBox.value);
     h3P.innerHTML = "Pac Man = " + dropBox.value;
 });
+if (nickname != "TCR") {
+    pacman.style.visibility = "hidden";
+}
 
 var h3B = document.createElement("h3");
 h3B.style.position = "absolute";
@@ -116,6 +123,9 @@ blinky.addEventListener('click', () => {
     socket.emit("makeblinky", dropBox.value);
     h3B.innerHTML = "Blinky = " + dropBox.value;
 });
+if (nickname != "TCR") {
+    blinky.style.visibility = "hidden";
+}
 
 var h3Pi = document.createElement("h3");
 h3Pi.style.position = "absolute";
@@ -135,6 +145,9 @@ pinky.addEventListener('click', () => {
     socket.emit("makepinky", dropBox.value);
     h3Pi.innerHTML = "Pinky = " + dropBox.value;
 });
+if (nickname != "TCR") {
+    pinky.style.visibility = "hidden";
+}
 
 var h3I = document.createElement("h3");
 h3I.style.position = "absolute";
@@ -154,6 +167,9 @@ inky.addEventListener('click', () => {
     socket.emit("makeinky", dropBox.value);
     h3I.innerHTML = "Inky = " + dropBox.value;
 });
+if (nickname != "TCR") {
+    inky.style.visibility = "hidden";
+}
 
 var gameStart = document.createElement("button");
 gameStart.style.position = "absolute";
@@ -165,6 +181,9 @@ gameStart.addEventListener('click', () => {
     secs = 0;
     
 });
+if (nickname != "TCR") {
+    gameStart.style.visibility = "hidden";
+}
 
 
 var gameRestart = document.createElement("button");
@@ -178,6 +197,9 @@ gameRestart.addEventListener('click', () => {
     /* alert(dropBox.value);
     alert("blinky"); */
 });
+if (nickname != "TCR") {
+    gameRestart.style.visibility = "hidden";
+}
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
