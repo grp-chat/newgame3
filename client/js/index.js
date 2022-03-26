@@ -7,6 +7,7 @@ var correctPin = false;
 var secs = 0;
 var students = ["LK", "LXR", "TJY", "JL", "JHA", "SZF"];
 var gameOver = false;
+var nothing = '';
 
 
 setInterval(() => {
