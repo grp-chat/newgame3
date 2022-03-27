@@ -75,8 +75,8 @@ canvas.height = innerHeight
 
 var dropBox = document.createElement("select");
 dropBox.style.position = "absolute";
-dropBox.style.left = "80%";
-dropBox.style.top = "35%";
+dropBox.style.left = "78%";
+dropBox.style.top = "5%";
 dropBox.setAttribute("id", "dropbox");
 document.body.appendChild(dropBox);
 if (nickname != "TCR") {
