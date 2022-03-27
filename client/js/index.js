@@ -5,7 +5,7 @@ var nickname = '';
 var pinNumber = 0;
 var correctPin = false;
 var secs = 0;
-var students = ["LK", "LXR", "TJY", "JL", "JHA", "SZF"];
+var students = ["LOK", "JW", "CED", "CJH", "KX", "KN"];
 var gameOver = false;
 var nothing = '';
 
