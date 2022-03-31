@@ -7,7 +7,7 @@ var correctPin = false;
 var secs = 0;
 var students = ["LOK", "JW", "CED", "CJH", "KX", "KN", "JV", "TCR"];
 var gameOver = false;
-var nothing = '';
+//var nothing = '';
 
 
 setInterval(() => {
@@ -250,8 +250,8 @@ class Player {
         if (this.role === 'pacman') {
             c.fillStyle = 'yellow'
         }
-        console.log(this.name)
-        console.log(this.role)
+        //console.log(this.name)
+        //console.log(this.role)
         c.fill()
         c.closePath()
         c.strokeText(this.name, this.position.x - 12, this.position.y + 4)
